@@ -1,6 +1,7 @@
 package com.example.coursework
 
 import android.content.res.Configuration
+import android.graphics.drawable.Drawable
 import android.mtp.MtpEvent
 import android.os.Bundle
 import android.provider.ContactsContract
@@ -44,83 +45,37 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
-
+import androidx.compose.ui.layout.ContentScale
+import androidx.navigation.NavHost
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.example.coursework.data.FoodData
+import com.example.coursework.data.Food
+import com.example.coursework.navigation.SetupNavGraph
+import com.example.coursework.components.FoodCard
+import com.example.coursework.screens.Foods
 class MainActivity : ComponentActivity() {
+
+    lateinit var navController: NavHostController
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             CourseworkTheme() {
-                Conversation(SampleData.conversationSample)
+                navController = rememberNavController()
+                SetupNavGraph(navController)
                 }
             }
         }
     }
 
 
-data class Message(val author: String, val body: String)
-
-
-@Composable
-fun MessageCard(msg: Message) {
-    Row(modifier = Modifier.padding(all = 8.dp).padding(top = 24.dp)){
-        Image(
-            painter = painterResource(R.drawable.screenshot_2026_01_08_141216),
-            contentDescription = null,
-            modifier = Modifier
-                .size(50.dp)
-                .clip(CircleShape)
-                .border(1.5.dp, MaterialTheme.colorScheme.primary, CircleShape)
-        )
-
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-
-        var isExpanded by remember { mutableStateOf(false) }
-        val surfaceColor by animateColorAsState(
-            if(isExpanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
-        )
-
-        Column(modifier = Modifier.clickable{ isExpanded = !isExpanded}){
-            Text(
-                text = msg.author,
-                color = MaterialTheme.colorScheme.secondary,
-                style = MaterialTheme.typography.titleSmall
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Surface(
-                shape = MaterialTheme.shapes.medium,
-                shadowElevation = 20.dp,
-                color = surfaceColor,
-                modifier = Modifier.animateContentSize().padding(1.dp)
-            ) {
-                Text(
-                    text = msg.body,
-                    modifier = Modifier.padding(all = 4.dp),
-                    maxLines = if(isExpanded) Int.MAX_VALUE else 1,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun Conversation(messages: List<Message>) {
-    LazyColumn() {
-        items(messages) { message ->
-            MessageCard(message)
-        }
-    }
-}
 
 @Preview
 @Composable
-fun PreviewConversation() {
+fun PreviewFoods() {
     CourseworkTheme() {
-        Conversation(SampleData.conversationSample)
+        Foods(FoodData.foodsList)
     }
 }
 
@@ -131,11 +86,11 @@ fun PreviewConversation() {
     name = "Dark Mode"
 )
 @Composable
-fun PreviewMessageCard() {
+fun PreviewFoodCard() {
     CourseworkTheme() {
         Surface() {
-            MessageCard(
-                msg = Message("Ante", "Hello, im learning JetPack Compose!")
+            FoodCard(
+                food = Food("Egg", "75", 6.0, 5.0, 0.0, R.drawable.egg)
             )
         }
     }
