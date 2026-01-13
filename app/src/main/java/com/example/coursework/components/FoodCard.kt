@@ -1,5 +1,6 @@
 package com.example.coursework.components
 
+import android.content.res.Configuration
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
@@ -8,6 +9,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -25,12 +28,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.coursework.R
 import com.example.coursework.data.Food
+import com.example.coursework.ui.theme.CourseworkTheme
 
 @Composable
 fun FoodCard(food: Food) {
-    Row(modifier = Modifier.padding(all = 8.dp).padding(top = 24.dp)) {
+    Row(
+        modifier = Modifier.padding(all = 8.dp)
+    ) {
         Image(
             painter = painterResource(food.picture),
             contentDescription = null,
@@ -52,8 +60,8 @@ fun FoodCard(food: Food) {
 
         Column(modifier = Modifier.clickable { isExpanded = !isExpanded }) {
             Text(
-                text = food.item,
-                color = MaterialTheme.colorScheme.secondary,
+                text = food.name,
+                color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.titleSmall
             )
 
@@ -66,12 +74,32 @@ fun FoodCard(food: Food) {
                 modifier = Modifier.animateContentSize().padding(1.dp)
             ) {
                 Text(
-                    text = food.calories + food.protein + food.fat + food.carbs,
+                    text = "Calories: ${food.calories}, " +
+                            "Protein: ${food.protein}, " +
+                            "Fats: ${food.fat}, "+
+                            "Carbohydrates: ${food.carbs}",
                     modifier = Modifier.padding(all = 4.dp),
-                    maxLines = if (isExpanded) Int.MAX_VALUE else 1,
+                    maxLines = if (isExpanded) Int.MAX_VALUE else 5,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
+        }
+    }
+}
+
+@Preview(name = "Light Mode")
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    name = "Dark Mode"
+)
+@Composable
+fun PreviewFoodCard() {
+    CourseworkTheme() {
+        Surface() {
+            FoodCard(
+                food = Food("Egg", "75", 6.0, 5.0, 0.0, R.drawable.egg)
+            )
         }
     }
 }

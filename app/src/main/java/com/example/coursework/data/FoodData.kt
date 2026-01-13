@@ -104,6 +104,39 @@ object FoodData {
             50.0,
             22.0,
             R.drawable.almonds
-        )
+        ),
+        Food(
+            "Sweet potato",
+            "86kcal/100g",
+            1.6,
+            0.1,
+            20.1,
+            R.drawable.sweetpotato
+        ),
+        Food(
+            "Tuna",
+            "132kcal/100g",
+            28.0,
+            1.0,
+            0.0,
+            R.drawable.tuna
+        ),
+        Food(
+            "Cottage cheese",
+            "98kcal/100g",
+            11.0,
+            4.3,
+            3.4,
+            R.drawable.cottagecheese
+        ),
+        Food(
+            "Olive oil",
+            "884kcal/100g",
+            0.0,
+            100.0,
+            0.0,
+            R.drawable.oliveoil
+        ),
+
     )
 }

@@ -1,6 +1,6 @@
 package com.example.coursework.data
 
-data class Food(val item: String,
+data class Food(val name: String,
                 val calories: String,
                 val protein: Double,
                 val fat: Double,

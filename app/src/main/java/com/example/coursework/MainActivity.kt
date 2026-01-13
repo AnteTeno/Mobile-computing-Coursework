@@ -53,7 +53,7 @@ import com.example.coursework.data.FoodData
 import com.example.coursework.data.Food
 import com.example.coursework.navigation.SetupNavGraph
 import com.example.coursework.components.FoodCard
-import com.example.coursework.screens.Foods
+import com.example.coursework.screens.FoodScreen
 class MainActivity : ComponentActivity() {
 
     lateinit var navController: NavHostController
@@ -71,28 +71,5 @@ class MainActivity : ComponentActivity() {
 
 
 
-@Preview
-@Composable
-fun PreviewFoods() {
-    CourseworkTheme() {
-        Foods(FoodData.foodsList)
-    }
-}
 
-@Preview(name = "Light Mode")
-@Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    showBackground = true,
-    name = "Dark Mode"
-)
-@Composable
-fun PreviewFoodCard() {
-    CourseworkTheme() {
-        Surface() {
-            FoodCard(
-                food = Food("Egg", "75", 6.0, 5.0, 0.0, R.drawable.egg)
-            )
-        }
-    }
-}
 
