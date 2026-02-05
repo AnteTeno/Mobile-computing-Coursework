@@ -9,6 +9,7 @@ import com.example.coursework.data.FoodData
 import com.example.coursework.screens.FoodScreen
 import com.example.coursework.screens.Screen
 import com.example.coursework.screens.HomeScreen
+import com.example.coursework.screens.ProfileScreen
 
 @Composable
 fun SetupNavGraph(
@@ -27,6 +28,11 @@ fun SetupNavGraph(
             route = Screen.FoodList.route
         ) {
             FoodScreen(FoodData.foodsList, navController)
+        }
+        composable(
+            route = Screen.Profile.route
+        ) {
+            ProfileScreen(navController)
         }
     }
 }
