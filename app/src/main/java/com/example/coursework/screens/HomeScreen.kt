@@ -164,6 +164,27 @@ fun HomeScreen(
             }
         }
 
+        Spacer(modifier = Modifier.height(22.dp))
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ElevatedButton(
+                onClick = { navController.navigate(route = Screen.Weather.route) },
+                colors = ButtonDefaults.elevatedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Text(
+                    text = "Weather",
+                    fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                    fontFamily = poppinsFontFamily,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+
+
     }
 }
 

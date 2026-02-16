@@ -1,14 +1,18 @@
 package com.example.coursework
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.mtp.MtpEvent
+import android.os.Build
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.widget.Space
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -54,12 +58,28 @@ import com.example.coursework.data.Food
 import com.example.coursework.navigation.SetupNavGraph
 import com.example.coursework.components.FoodCard
 import com.example.coursework.screens.FoodScreen
+import com.example.coursework.screens.Screen
+
+
 class MainActivity : ComponentActivity() {
 
     lateinit var navController: NavHostController
 
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        NotificationHelper.createNotificationChannel(this)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+
         setContent {
             CourseworkTheme() {
                 navController = rememberNavController()
@@ -67,6 +87,13 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        if (intent.getStringExtra("navigate_to") == "weather_screen") {
+            navController.navigate(Screen.Weather.route)
+        }
+    }
     }
 
 
