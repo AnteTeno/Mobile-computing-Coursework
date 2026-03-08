@@ -4,17 +4,18 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.coursework.components.FoodCard
-import com.example.coursework.data.FoodData
-import com.example.coursework.screens.FoodScreen
+import com.example.coursework.screens.DailyLogScreen
 import com.example.coursework.screens.Screen
 import com.example.coursework.screens.HomeScreen
 import com.example.coursework.screens.ProfileScreen
-import com.example.coursework.screens.WeatherScreen
+import com.example.coursework.screens.FoodSearchScreen
+import com.example.coursework.screens.SettingsScreen
+import com.example.coursework.SettingsManager
 
 @Composable
 fun SetupNavGraph(
-    navController: NavHostController
+    navController: NavHostController,
+    settingsManager: SettingsManager
 ) {
     NavHost(
         navController = navController,
@@ -28,7 +29,7 @@ fun SetupNavGraph(
         composable(
             route = Screen.FoodList.route
         ) {
-            FoodScreen(FoodData.foodsList, navController)
+            DailyLogScreen(navController)
         }
         composable(
             route = Screen.Profile.route
@@ -36,9 +37,14 @@ fun SetupNavGraph(
             ProfileScreen(navController)
         }
         composable(
-            route = Screen.Weather.route
+            route = Screen.FoodSearch.route
         ) {
-            WeatherScreen(navController)
+            FoodSearchScreen(navController)
+        }
+        composable(
+            route = Screen.Settings.route
+        ) {
+            SettingsScreen(navController, settingsManager)
         }
     }
 }

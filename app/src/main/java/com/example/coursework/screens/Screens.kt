@@ -6,5 +6,7 @@ sealed class Screen(val route: String) {
 
     object Profile: Screen(route = "profile_screen")
 
-    object Weather: Screen(route = "weather_screen")
+    object FoodSearch: Screen(route = "food_search_screen")
+
+    object Settings: Screen(route = "settings_screen")
 }

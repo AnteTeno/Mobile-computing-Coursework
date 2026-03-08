@@ -13,7 +13,8 @@ object DatabaseProvider {
             database = Room.databaseBuilder(
                 applicationContext,
                 AppDatabase::class.java, "database-name"
-            ).allowMainThreadQueries().build()
+            ).fallbackToDestructiveMigration()
+            .allowMainThreadQueries().build()
         }
 
         return database!!
