@@ -89,7 +89,6 @@ fun FoodSearchScreen(navController: NavController) {
     val db = DatabaseProvider.getDatabase(context)
     val foodEntryDao = db.foodEntryDao()
 
-    // Microphone permission state
     var hasMicPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
@@ -97,7 +96,6 @@ fun FoodSearchScreen(navController: NavController) {
         )
     }
 
-    // Camera permission state
     var hasCameraPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
@@ -105,10 +103,8 @@ fun FoodSearchScreen(navController: NavController) {
         )
     }
 
-    // Temp file for camera photo
     var tempPhotoFile by remember { mutableStateOf<File?>(null) }
 
-    // Mic permission launcher
     val micPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -118,7 +114,6 @@ fun FoodSearchScreen(navController: NavController) {
         }
     }
 
-    // Camera permission launcher
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -128,7 +123,6 @@ fun FoodSearchScreen(navController: NavController) {
         }
     }
 
-    // Speech recognition launcher
     val speechLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -157,7 +151,7 @@ fun FoodSearchScreen(navController: NavController) {
         }
     }
 
-    // Camera launcher
+
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { success ->
@@ -313,7 +307,7 @@ fun FoodSearchScreen(navController: NavController) {
         }
     }
 
-    // Add food dialog with camera option
+
     selectedFood?.let { food ->
         AlertDialog(
             onDismissRequest = { selectedFood = null },
@@ -331,7 +325,7 @@ fun FoodSearchScreen(navController: NavController) {
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Camera section
+
                     if (capturedPhotoPath != null) {
                         AsyncImage(
                             model = File(capturedPhotoPath!!),
@@ -356,7 +350,7 @@ fun FoodSearchScreen(navController: NavController) {
                         ) {
                             Text(
                                 if (hasCameraPermission) "Take Meal Photo"
-                                else "Grant Camera Permission & Take Photo"
+                                else "Take Photo"
                             )
                         }
                     }
@@ -373,7 +367,7 @@ fun FoodSearchScreen(navController: NavController) {
                             fat = food.fat,
                             carbs = food.carbs,
                             grams = grams,
-                            date = java.time.LocalDate.now().toString(),
+                            date = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date()),
                             imagePath = capturedPhotoPath
                         )
                     )

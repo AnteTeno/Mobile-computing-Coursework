@@ -102,8 +102,5 @@ dependencies {
 
 dependencies {
     implementation("io.coil-kt:coil-compose:2.5.0")
-}
-
-dependencies {
     implementation("androidx.core:core-splashscreen:1.0.1")
 }

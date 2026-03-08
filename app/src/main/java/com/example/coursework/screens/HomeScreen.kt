@@ -45,7 +45,9 @@ import com.example.coursework.database.DatabaseProvider
 import com.example.coursework.database.entities.FoodEntry
 import com.example.coursework.database.entities.User
 import java.io.File
-import java.time.LocalDate
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun HomeScreen(
@@ -58,7 +60,7 @@ fun HomeScreen(
 
     LaunchedEffect(Unit) {
         savedUser = db.userDao().getUser()
-        todayEntries = db.foodEntryDao().getEntriesForDate(LocalDate.now().toString())
+        todayEntries = db.foodEntryDao().getEntriesForDate(SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date()))
     }
 
     val totalCalories = todayEntries.sumOf { it.calories * it.grams / 100.0 }
@@ -74,7 +76,6 @@ fun HomeScreen(
     ) {
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Header with greeting and profile picture
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -115,7 +116,6 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Today's summary card
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
@@ -144,7 +144,6 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(28.dp))
 
-        // Navigation cards
         Text(
             text = "Quick Actions",
             style = MaterialTheme.typography.titleLarge,

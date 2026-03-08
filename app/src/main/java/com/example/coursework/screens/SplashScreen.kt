@@ -33,23 +33,19 @@ fun SplashScreen(navController: NavController) {
     val subtitleAlpha = remember { Animatable(0f) }
 
     LaunchedEffect(Unit) {
-        // Icon scales up with bounce
         iconScale.animateTo(
             targetValue = 1f,
             animationSpec = tween(600, easing = FastOutSlowInEasing)
         )
-        // Title fades in
         titleAlpha.animateTo(
             targetValue = 1f,
             animationSpec = tween(500)
         )
-        // Subtitle fades in
         subtitleAlpha.animateTo(
             targetValue = 1f,
             animationSpec = tween(400)
         )
         delay(800)
-        // Navigate to home and remove splash from back stack
         navController.navigate(Screen.Home.route) {
             popUpTo(Screen.Splash.route) { inclusive = true }
         }
@@ -65,7 +61,6 @@ fun SplashScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Animated food icon using emoji text
             Text(
                 text = "\uD83E\uDD57",
                 fontSize = 80.sp,

@@ -40,14 +40,16 @@ import com.example.coursework.R
 import com.example.coursework.database.DatabaseProvider
 import com.example.coursework.database.entities.FoodEntry
 import java.io.File
-import java.time.LocalDate
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun DailyLogScreen(navController: NavController) {
     val context = LocalContext.current
     val db = DatabaseProvider.getDatabase(context)
     val foodEntryDao = db.foodEntryDao()
-    val today = LocalDate.now().toString()
+    val today = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
 
     var entries by remember { mutableStateOf<List<FoodEntry>>(emptyList()) }
 
