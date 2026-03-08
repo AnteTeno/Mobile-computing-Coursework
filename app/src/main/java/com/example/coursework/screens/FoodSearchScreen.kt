@@ -1,5 +1,14 @@
 package com.example.coursework.screens
 
+import android.Manifest
+import android.app.Activity
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
@@ -21,6 +31,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -32,12 +43,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.coursework.R
 import com.example.coursework.database.DatabaseProvider
 import com.example.coursework.database.entities.FoodEntry
@@ -45,9 +61,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import java.io.File
 import java.net.HttpURLConnection
 import java.net.URLEncoder
 import java.net.URL
+import java.util.Locale
 
 data class SearchedFood(
     val name: String,
@@ -65,10 +83,126 @@ fun FoodSearchScreen(navController: NavController) {
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var selectedFood by remember { mutableStateOf<SearchedFood?>(null) }
     var gramsInput by remember { mutableStateOf("100") }
+    var capturedPhotoPath by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val db = DatabaseProvider.getDatabase(context)
     val foodEntryDao = db.foodEntryDao()
+
+    // Microphone permission state
+    var hasMicPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
+                    == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    // Camera permission state
+    var hasCameraPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+                    == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    // Temp file for camera photo
+    var tempPhotoFile by remember { mutableStateOf<File?>(null) }
+
+    // Mic permission launcher
+    val micPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        hasMicPermission = granted
+        if (!granted) {
+            Toast.makeText(context, "Microphone permission is needed for voice search", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Camera permission launcher
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        hasCameraPermission = granted
+        if (!granted) {
+            Toast.makeText(context, "Camera permission is needed to take photos", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Speech recognition launcher
+    val speechLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val spokenText = result.data
+                ?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                ?.firstOrNull()
+            if (!spokenText.isNullOrBlank()) {
+                query = spokenText
+                // Auto-search after voice input
+                isLoading = true
+                errorMessage = null
+                scope.launch {
+                    try {
+                        results = searchFoods(spokenText)
+                        if (results.isEmpty()) {
+                            errorMessage = "No results found"
+                        }
+                    } catch (e: Exception) {
+                        errorMessage = "Search failed: ${e.message}"
+                        results = emptyList()
+                    }
+                    isLoading = false
+                }
+            }
+        }
+    }
+
+    // Camera launcher
+    val cameraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            capturedPhotoPath = tempPhotoFile?.absolutePath
+        }
+    }
+
+    fun launchVoiceSearch() {
+        if (!hasMicPermission) {
+            micPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+            return
+        }
+
+        if (!SpeechRecognizer.isRecognitionAvailable(context)) {
+            Toast.makeText(context, "Speech recognition not available on this device", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+            putExtra(RecognizerIntent.EXTRA_PROMPT, "Say a food name...")
+        }
+        speechLauncher.launch(intent)
+    }
+
+    fun launchCamera() {
+        if (!hasCameraPermission) {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+            return
+        }
+
+        val photoDir = File(context.filesDir, "meal_photos")
+        if (!photoDir.exists()) photoDir.mkdirs()
+        val photoFile = File(photoDir, "meal_${System.currentTimeMillis()}.jpg")
+        tempPhotoFile = photoFile
+
+        val photoUri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            photoFile
+        )
+        cameraLauncher.launch(photoUri)
+    }
 
     Column(
         modifier = Modifier
@@ -104,6 +238,12 @@ fun FoodSearchScreen(navController: NavController) {
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp)
             )
+            IconButton(onClick = { launchVoiceSearch() }) {
+                Text(
+                    text = if (hasMicPermission) "\uD83C\uDF99" else "\uD83C\uDF99",
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
             Button(
                 onClick = {
                     if (query.isNotBlank()) {
@@ -127,6 +267,15 @@ fun FoodSearchScreen(navController: NavController) {
             ) {
                 Text("Search")
             }
+        }
+
+        if (!hasMicPermission) {
+            Text(
+                text = "Tap the mic icon to enable voice search",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -156,6 +305,7 @@ fun FoodSearchScreen(navController: NavController) {
                         FoodResultCard(food, onAdd = {
                             selectedFood = food
                             gramsInput = "100"
+                            capturedPhotoPath = null
                         })
                     }
                 }
@@ -163,6 +313,7 @@ fun FoodSearchScreen(navController: NavController) {
         }
     }
 
+    // Add food dialog with camera option
     selectedFood?.let { food ->
         AlertDialog(
             onDismissRequest = { selectedFood = null },
@@ -178,6 +329,37 @@ fun FoodSearchScreen(navController: NavController) {
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true
                     )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Camera section
+                    if (capturedPhotoPath != null) {
+                        AsyncImage(
+                            model = File(capturedPhotoPath!!),
+                            contentDescription = "Meal photo",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(150.dp)
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedButton(
+                            onClick = { launchCamera() },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Retake Photo")
+                        }
+                    } else {
+                        OutlinedButton(
+                            onClick = { launchCamera() },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                if (hasCameraPermission) "Take Meal Photo"
+                                else "Grant Camera Permission & Take Photo"
+                            )
+                        }
+                    }
                 }
             },
             confirmButton = {
@@ -191,16 +373,21 @@ fun FoodSearchScreen(navController: NavController) {
                             fat = food.fat,
                             carbs = food.carbs,
                             grams = grams,
-                            date = java.time.LocalDate.now().toString()
+                            date = java.time.LocalDate.now().toString(),
+                            imagePath = capturedPhotoPath
                         )
                     )
                     selectedFood = null
+                    capturedPhotoPath = null
                 }) {
                     Text("Add")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { selectedFood = null }) {
+                TextButton(onClick = {
+                    selectedFood = null
+                    capturedPhotoPath = null
+                }) {
                     Text("Cancel")
                 }
             }

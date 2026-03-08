@@ -2,4 +2,10 @@
 <resources>
 
     <style name="Theme.Coursework" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.Coursework.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#F5F7F5</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.Coursework</item>
+    </style>
 </resources>

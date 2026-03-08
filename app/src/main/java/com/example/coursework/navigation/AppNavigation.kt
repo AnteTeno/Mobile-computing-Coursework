@@ -10,6 +10,7 @@ import com.example.coursework.screens.HomeScreen
 import com.example.coursework.screens.ProfileScreen
 import com.example.coursework.screens.FoodSearchScreen
 import com.example.coursework.screens.SettingsScreen
+import com.example.coursework.screens.SplashScreen
 import com.example.coursework.SettingsManager
 
 @Composable
@@ -19,8 +20,13 @@ fun SetupNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = Screen.Splash.route
     ) {
+        composable(
+            route = Screen.Splash.route
+        ) {
+            SplashScreen(navController)
+        }
         composable(
             route = Screen.Home.route
         ) {

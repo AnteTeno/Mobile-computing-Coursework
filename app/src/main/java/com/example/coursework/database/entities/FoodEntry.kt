@@ -12,5 +12,6 @@ data class FoodEntry(
     val fat: Double,
     val carbs: Double,
     val grams: Double,
-    val date: String
+    val date: String,
+    val imagePath: String? = null
 )

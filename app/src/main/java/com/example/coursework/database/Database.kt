@@ -7,7 +7,7 @@ import com.example.coursework.database.dao.UserDao
 import com.example.coursework.database.entities.FoodEntry
 import com.example.coursework.database.entities.User
 
-@Database(entities = [User::class, FoodEntry::class], version = 2)
+@Database(entities = [User::class, FoodEntry::class], version = 3)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun foodEntryDao(): FoodEntryDao
