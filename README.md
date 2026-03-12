@@ -21,3 +21,6 @@ A nutrition tracking Android app called **NutriTrack**, built with **Kotlin** an
 - Coil (image loading)
 - Core Splash Screen API
 - Android SpeechRecognizer
+
+### Ai usage
+- Used AI to assist with reworking the UI and brainstorming UI ideas. Also the splash green photo is AI generated.
